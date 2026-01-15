@@ -77,7 +77,7 @@ DataGuard is an enterprise-grade data quality management platform that helps dat
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/automated-data-quality-leakage-detection.git
+git clone https://github.com/Naman09746/data-guard.git
 cd automated-data-quality-leakage-detection
 
 # Install Python dependencies
@@ -452,8 +452,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📬 Support
 
 - 📧 Email: your.email@example.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/automated-data-quality-leakage-detection/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/automated-data-quality-leakage-detection/discussions)
+- 🐛 Issues: [GitHub Issues](https://github.com/Naman09746/data-guard/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/Naman09746/data-guard/discussions)
 
 ---
 
