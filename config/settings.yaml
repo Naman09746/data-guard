@@ -1,0 +1,58 @@
+# Application settings
+app_name: "Data Quality & Leakage Detection System"
+environment: development
+debug: false
+
+# Data Quality Settings
+quality:
+  missing_value_threshold: 0.05
+  consistency_check_enabled: true
+  cross_column_validation: true
+  outlier_detection_method: zscore  # zscore, iqr, or mad
+  outlier_zscore_threshold: 3.0
+  outlier_iqr_multiplier: 1.5
+  max_data_age_hours: 24
+  enforce_schema: true
+  allow_extra_columns: false
+  coerce_types: true
+
+# Leakage Detection Settings
+leakage:
+  duplicate_detection_enabled: true
+  near_duplicate_threshold: 0.95
+  target_correlation_threshold: 0.95
+  temporal_validation_enabled: true
+  sample_size_for_detection: 10000
+  suspicious_feature_patterns:
+    - ".*_future.*"
+    - ".*_target.*"
+    - ".*_label.*"
+    - ".*_outcome.*"
+    - ".*_result.*"
+    - ".*_prediction.*"
+
+# Logging Settings
+logging:
+  level: INFO
+  format: json  # json or console
+  include_timestamp: true
+  include_caller: true
+
+# API Settings
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  workers: 4
+  cors_origins:
+    - "*"
+  api_prefix: "/api/v1"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+  rate_limit_per_minute: 100
+  request_timeout_seconds: 300
+
+# Performance Settings
+max_workers: 4
+chunk_size: 10000
+memory_limit_mb: 4096

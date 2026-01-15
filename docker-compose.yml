@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dq-leakage-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DQ_ENVIRONMENT=production
+      - DQ_DEBUG=false
+      - DQ_LOGGING__LEVEL=INFO
+      - DQ_LOGGING__FORMAT=json
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data:ro
+      - ./output:/app/output
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Optional: Add Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: dq-redis
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+
+networks:
+  default:
+    name: dq-network
