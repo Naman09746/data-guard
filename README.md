@@ -451,7 +451,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📬 Support
 
-- 📧 Email: your.email@example.com
+- 📧 Email: namanjoshi09746@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/Naman09746/data-guard/issues)
 - 💬 Discussions: [GitHub Discussions](https://github.com/Naman09746/data-guard/discussions)
 
