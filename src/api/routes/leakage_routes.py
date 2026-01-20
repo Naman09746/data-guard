@@ -136,3 +136,183 @@ async def detect_leakage_json(
             duration_seconds=round(report.duration_seconds, 4),
             summary=report.get_summary(),
             results=[r.to_dict() for r in report.detection_results],
+        )
+
+    except Exception as e:
+        logger.error("leakage_detection_json_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/health")
+async def leakage_health() -> dict[str, str]:
+    """Leakage detection service health check."""
+    return {"status": "healthy", "service": "leakage"}
+
+
+# ============== NEW ENDPOINTS ==============
+
+
+@router.post("/risk-scores")
+async def get_risk_scores(
+    data_file: UploadFile = File(...),
+    target_column: str = Form(...),
+    time_column: str | None = Form(None),
+) -> dict[str, Any]:
+    """
+    Get ML-based leakage risk scores for all features.
+    
+    Returns probability-based risk assessments (0-100%) for each feature.
+    """
+    try:
+        content = await data_file.read()
+        df = pd.read_csv(io.BytesIO(content))
+        
+        logger.info(
+            "risk_scoring_request",
+            rows=len(df),
+            target=target_column,
+        )
+        
+        model = LeakageRiskScoringModel()
+        result = model.predict_risk(df, target_column, time_column)
+        
+        return result.to_dict()
+        
+    except Exception as e:
+        logger.error("risk_scoring_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/experiments/impact")
+async def run_impact_experiment(
+    data_file: UploadFile = File(...),
+    target_column: str = Form(...),
+    time_column: str | None = Form(None),
+    model_type: str = Form("random_forest"),
+) -> dict[str, Any]:
+    """
+    Run a before/after leakage impact experiment.
+    
+    Trains models with and without leaky features to demonstrate impact.
+    """
+    try:
+        content = await data_file.read()
+        df = pd.read_csv(io.BytesIO(content))
+        
+        logger.info(
+            "impact_experiment_request",
+            rows=len(df),
+            target=target_column,
+            model_type=model_type,
+        )
+        
+        experiment = LeakageImpactExperiment(model_type=model_type)
+        result = experiment.run_experiment(df, target_column, time_column)
+        
+        return result.to_dict()
+        
+    except Exception as e:
+        logger.error("impact_experiment_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/history")
+async def get_scan_history(
+    limit: int = 50,
+    scan_type: str | None = None,
+) -> dict[str, Any]:
+    """
+    Get scan history.
+    """
+    try:
+        store = ScanHistoryStore()
+        
+        type_filter = None
+        if scan_type:
+            type_filter = ScanType(scan_type)
+        
+        scans = store.get_scans(limit=limit, scan_type=type_filter)
+        
+        return {
+            "total": len(scans),
+            "scans": [s.to_dict() for s in scans],
+        }
+        
+    except Exception as e:
+        logger.error("scan_history_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/alerts")
+async def get_alerts(
+    status: str | None = None,
+    alert_type: str | None = None,
+    limit: int = 50,
+) -> dict[str, Any]:
+    """
+    Get alerts with optional filtering.
+    """
+    try:
+        manager = AlertManager()
+        
+        status_filter = AlertStatus(status) if status else None
+        type_filter = AlertType(alert_type) if alert_type else None
+        
+        alerts = manager.get_alerts(
+            status=status_filter,
+            alert_type=type_filter,
+            limit=limit,
+        )
+        
+        summary = manager.get_alert_summary()
+        
+        return {
+            "summary": summary,
+            "alerts": [a.to_dict() for a in alerts],
+        }
+        
+    except Exception as e:
+        logger.error("alerts_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/alerts/{alert_id}/acknowledge")
+async def acknowledge_alert(alert_id: str) -> dict[str, Any]:
+    """Acknowledge an alert."""
+    try:
+        manager = AlertManager()
+        success = manager.acknowledge_alert(alert_id)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        
+        return {"status": "acknowledged", "alert_id": alert_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("acknowledge_alert_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/alerts/{alert_id}/resolve")
+async def resolve_alert(
+    alert_id: str,
+    resolution_note: str = Form(""),
+) -> dict[str, Any]:
+    """Resolve an alert."""
+    try:
+        manager = AlertManager()
+        success = manager.resolve_alert(alert_id, resolution_note)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        
+        return {"status": "resolved", "alert_id": alert_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("resolve_alert_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+

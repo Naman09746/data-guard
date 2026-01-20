@@ -211,4 +211,35 @@ class LeakageDetectionEngine:
         
         Returns:
             True if leakage is detected, False otherwise.
-    
+        """
+        report = self.detect(train_data, test_data, target_column)
+        return report.has_leakage
+
+    def get_risk_scores(
+        self,
+        data: pd.DataFrame,
+        target_column: str,
+        time_column: str | None = None,
+    ) -> RiskScoringResult:
+        """
+        Get ML-based leakage risk scores for all features.
+        
+        Uses a trained Random Forest model to predict risk levels
+        (LOW, MEDIUM, HIGH) for each feature based on learned patterns.
+        
+        Args:
+            data: DataFrame to analyze
+            target_column: Name of target column
+            time_column: Optional time column for temporal analysis
+            
+        Returns:
+            RiskScoringResult with risk scores for all features
+        """
+        self._logger.info(
+            "computing_risk_scores",
+            rows=len(data),
+            target=target_column,
+        )
+        
+        model = LeakageRiskScoringModel()
+        return model.predict_risk(data, target_column, time_column)

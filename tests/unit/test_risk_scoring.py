@@ -268,4 +268,4 @@ class TestIntegrationWithEngine:
         
         assert isinstance(result, RiskScoringResult)
         assert len(result.feature_scores) == 2
-        assert "leaky_feature" in result.high_risk_features or result.feature_scores[0
+        assert "leaky_feature" in result.high_risk_features or result.feature_scores[0].feature_name == "leaky_feature"

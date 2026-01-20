@@ -14,4 +14,17 @@ function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/quality" eleme
+        <Route path="/quality" element={<QualityPage />} />
+        <Route path="/leakage" element={<LeakagePage />} />
+        <Route path="/risk-scoring" element={<RiskScoringPage />} />
+        <Route path="/experiments" element={<ExperimentPage />} />
+        <Route path="/alerts" element={<AlertsPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/rules" element={<RulesPage />} />
+      </Routes>
+    </Layout>
+  )
+}
+
+export default App
+

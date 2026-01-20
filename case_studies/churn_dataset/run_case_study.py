@@ -336,4 +336,4 @@ Files Generated:
 
 
 if __name__ == "__main__":
-    run_cas
+    run_case_study()
