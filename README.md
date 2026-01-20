@@ -1,466 +1,253 @@
-<div align="center">
+# Automated Data Quality & Leakage Detection System
 
-# 🛡️ DataGuard
-
-### Automated Data Quality & Leakage Detection System
-
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg)](https://www.typescriptlang.org/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-**A production-ready, full-stack solution for automated data quality validation and ML data leakage detection.**
+A **production-grade data quality and leakage detection system** for ML pipelines. This system transforms from a rule-based validator to a **meta-ML platform** that learns failure patterns.
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [API Reference](#-api-reference) • [Contributing](#-contributing)
+## 🌟 Key Features
 
-</div>
+### 🔥 1. ML-Based Leakage Risk Scoring
+Instead of rule-based detection ("correlation > 0.95"), get **probability-based risk scores**:
+```
+Feature X has an 87% leakage risk based on learned patterns
+```
 
----
+Features extracted per column:
+- Correlation with target
+- Mutual information proxy
+- Stability across cross-validation splits
+- Time-lag correlation behavior
+- High-cardinality detection
 
-## 📋 Overview
+### 🧪 2. Before vs After Impact Experiments
+Prove business value by comparing:
+- Model trained **WITH** leaky features (inflated metrics)
+- Model trained **AFTER** removal (realistic metrics)
 
-DataGuard is an enterprise-grade data quality management platform that helps data scientists and ML engineers ensure their datasets meet quality standards and are free from data leakage issues before model training.
+Generates reports showing:
+- Accuracy drop
+- Generalization gap improvement
+- Cross-validation stability
 
-### Why DataGuard?
+### 📊 3. Data Versioning & Scan History
+Track dataset evolution with:
+- Hash-based dataset versioning
+- Scan history storage
+- Diff between scans
+- **Regression alerts** when quality degrades
 
-- **Prevent Model Failures**: Catch data quality issues before they corrupt your ML pipeline
-- **Detect Data Leakage**: Identify train-test contamination, target leakage, and temporal issues
-- **Modern Dashboard**: Beautiful React UI for real-time validation and monitoring
-- **Production Ready**: FastAPI backend with comprehensive error handling and logging
-- **Extensible**: Custom validation rules with YAML configuration support
+### 🚨 4. Drift → Alert → Action Loop
+End-to-end ML lifecycle management:
+- Drift detection with severity scoring
+- Alerts with actionable recommendations
+- Affected model tracking
+- Retrain/revalidate suggestions
 
----
-
-## ✨ Features
-
-### 🔍 Data Quality Validation
-
-| Validator | Description |
-|-----------|-------------|
-| **Schema Validator** | Type checking, constraint validation, pattern matching, schema inference |
-| **Completeness Checker** | Missing value detection, null pattern analysis, configurable thresholds |
-| **Consistency Analyzer** | Cross-column rules, referential integrity, expression validation |
-| **Accuracy Validator** | Range checks, outlier detection, domain validation, format verification |
-| **Timeliness Monitor** | Data freshness, future date detection, temporal gap analysis |
-| **Custom Rules** | 16+ built-in validators (email, phone, credit card, etc.) with YAML support |
-
-### 🚨 Leakage Detection
-
-| Detector | Description |
-|----------|-------------|
-| **Train-Test Detector** | Exact/near-duplicate detection, distribution comparison |
-| **Target Leakage Detector** | High correlation analysis, mutual information scoring |
-| **Feature Leakage Detector** | Suspicious patterns, constant features, metadata analysis |
-| **Temporal Leakage Detector** | Time overlap, look-ahead bias, ordering validation |
-| **Data Drift Detector** | KS test, Chi-squared test, Population Stability Index (PSI) |
-
-### 🎨 Modern Dashboard
-
-- **Real-time Validation**: Drag & drop CSV upload with instant results
-- **Quality Scoring**: Industry-standard tier-based scoring system
-- **Session Tracking**: Validation history with trend visualization
-- **Custom Rules UI**: Configure and manage validation rules visually
-- **Dark Theme**: Beautiful glassmorphism design with animations
-
----
+### 📚 5. Real-World Case Study
+Complete churn prediction case study demonstrating:
+- Leakage detection in action
+- Impact experiments
+- Before/after comparison
 
 ## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- pip or uv (Python package manager)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/Naman09746/data-guard.git
-cd automated-data-quality-leakage-detection
+git clone https://github.com/yourusername/data-quality-leakage-detection.git
+cd data-quality-leakage-detection
 
-# Install Python dependencies
+# Install dependencies
 pip install -e ".[dev]"
-
-# Install dashboard dependencies
-cd dashboard
-npm install
-cd ..
 ```
 
-### Running the Application
-
-**Terminal 1 - Backend API:**
-```bash
-make run
-# or
-uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-**Terminal 2 - Frontend Dashboard:**
-```bash
-cd dashboard
-npm run dev
-```
-
-**Access the application:**
-- 🌐 Dashboard: http://localhost:5173
-- 📡 API Docs: http://localhost:8000/docs
-- ❤️ Health Check: http://localhost:8000/api/v1/health
-
----
-
-## 📖 Documentation
-
-### Python API Usage
+### Basic Usage
 
 ```python
+from src.leakage_detection.leakage_engine import LeakageDetectionEngine
+from src.data_quality.quality_engine import DataQualityEngine
 import pandas as pd
-from src.data_quality import DataQualityEngine
-from src.leakage_detection import LeakageDetectionEngine
 
 # Load your data
 df = pd.read_csv("your_data.csv")
 
-# Data Quality Validation
+# Data Quality Check
 quality_engine = DataQualityEngine()
 quality_report = quality_engine.validate(df)
-
-print(f"Status: {quality_report.status}")
-print(f"Issues Found: {quality_report.total_issues}")
-print(quality_report.to_markdown())
+print(f"Quality Score: {quality_engine.get_quality_score(df):.2f}")
 
 # Leakage Detection
-train_df = pd.read_csv("train.csv")
-test_df = pd.read_csv("test.csv")
-
 leakage_engine = LeakageDetectionEngine()
-leakage_report = leakage_engine.detect(
-    train_data=train_df,
-    test_data=test_df,
-    target_column="target"
-)
+leakage_report = leakage_engine.detect(df, target_column="target")
+print(f"Leakage Status: {leakage_report.status.value}")
 
-print(f"Clean: {leakage_report.is_clean}")
-print(leakage_report.to_markdown())
+# ML-Based Risk Scores
+risk_result = leakage_engine.get_risk_scores(df, "target")
+print(f"High-Risk Features: {risk_result.high_risk_features}")
 ```
 
-### Custom Validation Rules
+### Running Impact Experiments
 
 ```python
-from src.data_quality.validators.custom_rules import CustomRulesValidator, CustomRule
+from src.leakage_detection.impact_experiment import LeakageImpactExperiment
 
-# Define custom rules
-rules = [
-    CustomRule(
-        name="Email Validation",
-        rule_type="email",
-        column="email",
-        severity="error"
-    ),
-    CustomRule(
-        name="Age Range",
-        rule_type="range",
-        column="age",
-        parameters={"min": 0, "max": 120}
-    ),
-    CustomRule(
-        name="Phone Format",
-        rule_type="phone",
-        column="phone",
-        parameters={"format": "international"}
-    )
-]
+experiment = LeakageImpactExperiment(model_type="random_forest")
+result = experiment.run_experiment(df, "target")
 
-validator = CustomRulesValidator(rules=rules)
-result = validator.validate(df)
+print(f"Accuracy WITH leakage: {result.metrics_with_leakage.accuracy:.1%}")
+print(f"Accuracy AFTER removal: {result.metrics_after_removal.accuracy:.1%}")
+print(f"Accuracy drop: {result.accuracy_drop:.1%}")
 ```
 
-### YAML Rule Configuration
+### Data Versioning
 
-```yaml
-# config/custom_rules.yaml
-rules:
-  - name: Email Validation
-    rule_type: email
-    column: customer_email
-    enabled: true
-    severity: error
+```python
+from src.core.data_versioning import DataVersioner, ScanHistoryStore
 
-  - name: Transaction Amount
-    rule_type: range
-    column: amount
-    parameters:
-      min: 0
-      max: 1000000
-    severity: warning
+# Version your dataset
+versioner = DataVersioner()
+version = versioner.create_version(df)
+print(f"Dataset Version: {version.version_hash}")
+
+# Track scan history
+store = ScanHistoryStore()
+history = store.get_scans(limit=10)
 ```
 
----
+### Alert Management
 
-## 🔌 API Reference
+```python
+from src.core.alert_system import AlertManager
 
-### Data Quality Endpoints
+manager = AlertManager()
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/quality/validate` | Validate CSV file upload |
-| `POST` | `/api/v1/quality/validate/json` | Validate JSON data |
+# Get open alerts
+alerts = manager.get_open_alerts()
+for alert in alerts:
+    print(f"{alert.severity.value}: {alert.title}")
 
-### Leakage Detection Endpoints
+# Create drift alert
+alert = manager.create_drift_alert(
+    feature_name="price",
+    drift_score=0.8,
+    drift_type="distribution_shift"
+)
+```
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/leakage/detect` | Detect leakage in uploaded files |
-| `POST` | `/api/v1/leakage/detect/json` | Detect leakage in JSON data |
-
-### Example Request
+## 🧪 Running the Case Study
 
 ```bash
-# Quality Validation
-curl -X POST "http://localhost:8000/api/v1/quality/validate" \
-  -H "accept: application/json" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@your_data.csv"
-
-# Leakage Detection
-curl -X POST "http://localhost:8000/api/v1/leakage/detect" \
-  -H "accept: application/json" \
-  -F "train_file=@train.csv" \
-  -F "test_file=@test.csv" \
-  -F "target_column=target"
+cd case_studies/churn_dataset
+python run_case_study.py
 ```
 
-### Response Format
+This generates:
+- `raw_data.csv` - Synthetic churn dataset with intentional leakage
+- `leakage_found.md` - Detection report
+- `metrics_before.md` - Inflated model metrics
+- `metrics_after.md` - Realistic metrics after cleanup
 
-```json
-{
-  "status": "warning",
-  "passed": false,
-  "total_issues": 3,
-  "duration_seconds": 0.017,
-  "summary": {
-    "data_rows": 2880,
-    "data_columns": 7,
-    "validators_run": 5,
-    "validators_passed": 2
-  },
-  "results": [
-    {
-      "validator_name": "SchemaValidator",
-      "status": "warning",
-      "issues": [...]
-    }
-  ]
-}
+## 🔌 API Endpoints
+
+Start the server:
+```bash
+uvicorn src.api.main:app --reload --port 8000
 ```
 
----
+### Available Endpoints
 
-## 📁 Project Structure
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/leakage/detect` | POST | Upload CSV for leakage detection |
+| `/api/leakage/risk-scores` | POST | Get ML-based risk scores |
+| `/api/leakage/experiments/impact` | POST | Run before/after experiment |
+| `/api/leakage/history` | GET | Get scan history |
+| `/api/leakage/alerts` | GET | Get alerts |
+| `/api/leakage/alerts/{id}/acknowledge` | POST | Acknowledge alert |
+| `/api/leakage/alerts/{id}/resolve` | POST | Resolve alert |
+| `/api/quality/validate` | POST | Run quality validation |
+
+## 🏗️ Project Structure
 
 ```
-automated-data-quality-leakage-detection/
 ├── src/
-│   ├── core/                    # Configuration, exceptions, logging
-│   │   ├── config.py            # Pydantic settings management
-│   │   ├── exceptions.py        # Custom exception hierarchy
-│   │   └── logging_config.py    # Structured logging with structlog
-│   │
-│   ├── data_quality/            # Data quality validation
-│   │   ├── validators/          # Individual validators
-│   │   │   ├── schema_validator.py
-│   │   │   ├── completeness_checker.py
-│   │   │   ├── consistency_analyzer.py
-│   │   │   ├── accuracy_validator.py
-│   │   │   ├── timeliness_monitor.py
-│   │   │   └── custom_rules.py
-│   │   ├── quality_engine.py    # Orchestration engine
-│   │   └── quality_report.py    # Report generation
-│   │
-│   ├── leakage_detection/       # ML leakage detection
-│   │   ├── detectors/           # Individual detectors
-│   │   │   ├── train_test_detector.py
-│   │   │   ├── target_leakage_detector.py
-│   │   │   ├── feature_leakage_detector.py
-│   │   │   ├── temporal_leakage_detector.py
-│   │   │   └── data_drift_detector.py
-│   │   ├── leakage_engine.py    # Orchestration engine
-│   │   └── leakage_report.py    # Report generation
-│   │
-│   ├── api/                     # FastAPI REST API
-│   │   ├── main.py              # App initialization
-│   │   ├── routes/              # API endpoints
-│   │   └── schemas/             # Pydantic request/response models
-│   │
-│   └── utils/                   # Utilities
-│       ├── data_loader.py       # Multi-format data loading
-│       └── statistics.py        # Statistical analysis
-│
-├── dashboard/                   # React + TypeScript frontend
-│   ├── src/
-│   │   ├── components/          # Reusable UI components
-│   │   ├── pages/               # Page components
-│   │   ├── api/                 # API client
-│   │   └── store/               # State management
-│   └── package.json
-│
-├── tests/                       # Test suite
-│   ├── unit/                    # Unit tests
-│   └── integration/             # Integration tests
-│
-├── config/                      # Configuration files
-│   └── settings.yaml            # Application settings
-│
-├── Dockerfile                   # Container configuration
-├── docker-compose.yml           # Multi-service orchestration
-├── Makefile                     # Development commands
-└── pyproject.toml               # Python project configuration
+│   ├── api/                    # FastAPI routes
+│   ├── core/
+│   │   ├── alert_system.py     # Alert management
+│   │   ├── data_versioning.py  # Dataset versioning
+│   │   └── config.py           # Configuration
+│   ├── data_quality/
+│   │   ├── quality_engine.py   # Main quality validator
+│   │   └── validators/         # Individual validators
+│   ├── leakage_detection/
+│   │   ├── leakage_engine.py   # Main detection orchestrator
+│   │   ├── risk_scoring_model.py   # ML-based risk scoring
+│   │   ├── impact_experiment.py    # Before/after experiments
+│   │   └── detectors/          # Individual detectors
+│   └── utils/
+├── dashboard/                  # React + Vite frontend
+├── case_studies/
+│   └── churn_dataset/          # Complete case study
+├── tests/
+│   ├── unit/
+│   │   ├── test_risk_scoring.py
+│   │   ├── test_impact_experiment.py
+│   │   ├── test_data_versioning.py
+│   │   ├── test_alert_system.py
+│   │   ├── test_detectors.py
+│   │   └── test_validators.py
+│   └── integration/
+└── pyproject.toml
 ```
 
----
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-```bash
-# .env file
-DQ_ENVIRONMENT=development
-DQ_DEBUG=true
-DQ_LOG_LEVEL=INFO
-
-# Quality thresholds
-DQ_QUALITY__MISSING_VALUE_THRESHOLD=0.1
-DQ_QUALITY__OUTLIER_THRESHOLD=3.0
-
-# Leakage thresholds
-DQ_LEAKAGE__CORRELATION_THRESHOLD=0.95
-DQ_LEAKAGE__SIMILARITY_THRESHOLD=0.9
-
-# API settings
-DQ_API__HOST=0.0.0.0
-DQ_API__PORT=8000
-```
-
-### YAML Configuration
-
-```yaml
-# config/settings.yaml
-quality:
-  missing_value_threshold: 0.1
-  outlier_threshold: 3.0
-  enable_schema_validation: true
-  enable_completeness_check: true
-
-leakage:
-  correlation_threshold: 0.95
-  similarity_threshold: 0.9
-  check_temporal_leakage: true
-```
-
----
-
-## 🧪 Testing
+## 🧪 Running Tests
 
 ```bash
 # Run all tests
-make test
+pytest tests/ -v
 
 # Run with coverage
-make test-cov
+pytest tests/ -v --cov=src --cov-report=html
 
 # Run specific test file
-pytest tests/unit/test_validators.py -v
-
-# Run linting
-make lint
-
-# Run type checking
-make type-check
+pytest tests/unit/test_risk_scoring.py -v
 ```
 
----
+## 📈 Why This Matters for ML
 
-## 🐳 Docker Deployment
+1. **Leakage causes unrealistic expectations** - Models appear to perform much better than they will in production
+2. **ML-based detection catches subtle leaks** - Rule-based approaches miss complex patterns
+3. **Impact experiments prove business value** - Show stakeholders exactly why leakage matters
+4. **Version tracking enables observability** - Know when quality degrades before it affects models
+
+## 🔧 Configuration
+
+Create a `.env` file (see `.env.example`):
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up --build
+# Logging
+LOG_LEVEL=INFO
 
-# Or build manually
-docker build -t dataguard .
-docker run -p 8000:8000 dataguard
+# API
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# Alert thresholds
+CORRELATION_THRESHOLD=0.95
+DRIFT_THRESHOLD=0.1
 ```
-
----
-
-## 🔐 Quality Score Calculation
-
-DataGuard uses an industry-standard tier-based scoring system:
-
-| Status | Base Score | Issue Penalty | Score Range |
-|--------|------------|---------------|-------------|
-| **PASSED** | 100% | -2 pts/issue (max -15) | 85-100% |
-| **WARNING** | 80% | -2 pts/issue (max -30) | 50-84% |
-| **FAILED** | 45% | -2 pts/issue (max -45) | 0-49% |
-
-**Example:**
-- Passed with 2 issues: `100 - (2 × 2) = 96%`
-- Warning with 5 issues: `80 - (5 × 2) = 70%`
-
----
-
-## 🛠️ Built With
-
-**Backend:**
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
-- [Pandas](https://pandas.pydata.org/) - Data manipulation
-- [scikit-learn](https://scikit-learn.org/) - ML utilities
-- [Pydantic](https://docs.pydantic.dev/) - Data validation
-- [structlog](https://www.structlog.org/) - Structured logging
-
-**Frontend:**
-- [React 18](https://react.dev/) - UI library
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Vite](https://vitejs.dev/) - Build tool
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [Recharts](https://recharts.org/) - Data visualization
-- [React Query](https://tanstack.com/query) - API state management
-
----
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) first.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## 📬 Support
-
-- 📧 Email: namanjoshi09746@gmail.com
-- 🐛 Issues: [GitHub Issues](https://github.com/Naman09746/data-guard/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/Naman09746/data-guard/discussions)
-
----
-
-<div align="center">
-
-Made with ❤️ for the Data Science Community
-
-**⭐ Star this repo if you find it useful!**
-
-</div>
+**Built for production ML pipelines** - ensuring data quality and preventing leakage before it affects your models.

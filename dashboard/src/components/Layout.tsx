@@ -7,6 +7,10 @@ import {
     Settings,
     Database,
     Activity,
+    Brain,
+    FlaskConical,
+    Bell,
+    History,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -17,6 +21,10 @@ const navItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/quality', label: 'Data Quality', icon: ShieldCheck },
     { path: '/leakage', label: 'Leakage Detection', icon: AlertTriangle },
+    { path: '/risk-scoring', label: 'Risk Scoring', icon: Brain },
+    { path: '/experiments', label: 'Experiments', icon: FlaskConical },
+    { path: '/alerts', label: 'Alerts', icon: Bell },
+    { path: '/history', label: 'History', icon: History },
     { path: '/rules', label: 'Custom Rules', icon: Settings },
 ]
 

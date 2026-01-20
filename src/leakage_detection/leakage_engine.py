@@ -21,6 +21,10 @@ from src.leakage_detection.detectors.target_leakage_detector import TargetLeakag
 from src.leakage_detection.detectors.temporal_leakage_detector import TemporalLeakageDetector
 from src.leakage_detection.detectors.train_test_detector import TrainTestDetector
 from src.leakage_detection.leakage_report import LeakageReport, LeakageStatus
+from src.leakage_detection.risk_scoring_model import (
+    LeakageRiskScoringModel,
+    RiskScoringResult,
+)
 
 logger = get_logger(__name__)
 
@@ -207,6 +211,4 @@ class LeakageDetectionEngine:
         
         Returns:
             True if leakage is detected, False otherwise.
-        """
-        report = self.detect(train_data, test_data, target_column)
-        return report.has_leakage
+    

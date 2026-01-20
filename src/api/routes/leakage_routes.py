@@ -1,12 +1,13 @@
 """
 Leakage Detection API routes.
 
-Provides endpoints for data leakage detection.
+Provides endpoints for data leakage detection, risk scoring, and experiments.
 """
 
 from __future__ import annotations
 
 import io
+from typing import Any
 
 import pandas as pd
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -15,6 +16,10 @@ from src.api.schemas.requests import LeakageDetectionRequest
 from src.api.schemas.responses import LeakageDetectionResponse
 from src.core.logging_config import get_logger
 from src.leakage_detection.leakage_engine import LeakageDetectionEngine
+from src.leakage_detection.risk_scoring_model import LeakageRiskScoringModel
+from src.leakage_detection.impact_experiment import LeakageImpactExperiment
+from src.core.data_versioning import ScanHistoryStore, ScanType
+from src.core.alert_system import AlertManager, AlertType, AlertStatus
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -131,14 +136,3 @@ async def detect_leakage_json(
             duration_seconds=round(report.duration_seconds, 4),
             summary=report.get_summary(),
             results=[r.to_dict() for r in report.detection_results],
-        )
-
-    except Exception as e:
-        logger.error("leakage_detection_json_error", error=str(e))
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/health")
-async def leakage_health() -> dict[str, str]:
-    """Leakage detection service health check."""
-    return {"status": "healthy", "service": "leakage"}
