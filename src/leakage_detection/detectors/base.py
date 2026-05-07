@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Generic, TypeVar
 
@@ -77,7 +77,7 @@ class DetectionResult:
     issues: list[LeakageIssue] = field(default_factory=list)
     metrics: dict[str, Any] = field(default_factory=dict)
     duration_seconds: float = 0.0
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     @property
     def has_leakage(self) -> bool:

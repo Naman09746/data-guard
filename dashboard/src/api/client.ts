@@ -155,6 +155,94 @@ export interface AlertsResponse {
     alerts: Alert[]
 }
 
+export interface ColumnProfile {
+    name: string
+    type: string
+    count: number
+    missing_count: number
+    missing_pct: number
+    unique_count: number
+    unique_pct: number
+    mean?: number
+    std?: number
+    min?: number
+    max?: number
+    p25?: number
+    p50?: number
+    p75?: number
+    skewness?: number
+    kurtosis?: number
+    outliers_count?: number
+    top_values?: Array<{ value: string; count: number }>
+    imbalance_ratio?: number
+    histogram?: { counts: number[]; bin_edges: any[] }
+}
+
+export interface EDAReport {
+    scan_id: string
+    dataset_name: string
+    shape: [number, number]
+    memory_mb: number
+    duplicate_rows: number
+    duplicate_pct: number
+    overall_health_score: number
+    column_profiles: ColumnProfile[]
+    correlation_matrix: number[][]
+    column_labels: string[]
+    missing_heatmap: Array<{ column: string; mask: boolean[] }>
+    class_balance?: { counts: Record<string, number>; percentages: Record<string, number> }
+    top_risks: string[]
+    recommendations: string[]
+    created_at: string
+}
+
+export interface Insight {
+    id: string
+    scan_id: string
+    narrative: string
+    top_risks?: string[]
+    recommendations?: string[]
+    executive_summary?: string
+    model_name: string
+    created_at: string
+}
+
+export interface TaskResponse {
+    task_id: string
+    scan_id: number
+    status: string
+    message: string
+}
+
+export interface TaskStatusResponse {
+    task_id: string
+    status: string
+    progress: number
+    result?: any
+    detail?: string
+}
+
+export interface FeatureDrift {
+    name: string
+    score: number
+    is_drifted: boolean
+    p_value: number
+    dist_ref: number[]
+    dist_curr: number[]
+}
+
+export interface DriftResponse {
+    summary: {
+        drift_detected: boolean
+        drifted_features_count: number
+        total_features_analyzed: number
+        drifted_features: string[]
+        timestamp: string
+        overall_drift_score: number
+    }
+    feature_drifts: FeatureDrift[]
+}
+
 export async function validateQuality(file: File): Promise<QualityResponse> {
     const formData = new FormData()
     formData.append('file', file)
@@ -274,5 +362,92 @@ export async function healthCheck(): Promise<{ status: string }> {
     return response.data
 }
 
+export async function profileDataset(
+    file: File,
+    targetColumn?: string
+): Promise<TaskResponse> {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (targetColumn) {
+        formData.append('target_column', targetColumn)
+    }
+
+    const response = await api.post<TaskResponse>('/eda/profile', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })
+
+    return response.data
+}
+
 export default api
 
+
+export async function getInsights(scanId: string): Promise<Insight> {
+    const response = await api.get<Insight>(`/eda/insights/${scanId}`)
+    return response.data
+}
+
+export async function analyzeDrift(
+    referenceFile: File,
+    currentFile: File
+): Promise<DriftResponse> {
+    const formData = new FormData()
+    formData.append('reference_file', referenceFile)
+    formData.append('current_file', currentFile)
+
+    const response = await api.post<DriftResponse>('/drift/analyze', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })
+
+    return response.data
+}
+
+export interface NetworkGraph {
+    nodes: any[]
+    links: any[]
+    overall_risk: string
+}
+
+export async function getLeakageNetwork(
+    file: File,
+    targetColumn: string
+): Promise<NetworkGraph> {
+    const formData = new FormData()
+    formData.append('data_file', file)
+    formData.append('target_column', targetColumn)
+
+    const response = await api.post<NetworkGraph>('/leakage/network', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })
+
+    return response.data
+}
+
+export interface DashboardStats {
+    summary: {
+        total_scans: number
+        active_alerts: number
+        global_health_score: number
+        total_issues_blocked: number
+    }
+    risk_distribution: Record<string, number>
+    timeline: Array<{ date: string, score: number, count: number }>
+    recent_scans: Array<{
+        id: number
+        name: string
+        type: string
+        score: number
+        date: string
+    }>
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+    const response = await api.get<DashboardStats>('/intelligence/stats')
+    return response.data
+}

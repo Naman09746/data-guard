@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -126,8 +126,8 @@ class Alert:
     recommendations: list[ActionRecommendation] = field(default_factory=list)
     
     # Metadata
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     acknowledged_at: datetime | None = None
     resolved_at: datetime | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -213,7 +213,7 @@ class AlertManager:
     
     def _generate_alert_id(self, prefix: str = "ALT") -> str:
         """Generate a unique alert ID."""
-        timestamp = datetime.now(UTC).isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         return f"{prefix}_{hashlib.md5(timestamp.encode()).hexdigest()[:10]}"
     
     def create_alert(
@@ -400,8 +400,8 @@ class AlertManager:
         for data in alerts_data:
             if data.get("alert_id") == alert_id:
                 data["status"] = AlertStatus.ACKNOWLEDGED.value
-                data["acknowledged_at"] = datetime.now(UTC).isoformat()
-                data["updated_at"] = datetime.now(UTC).isoformat()
+                data["acknowledged_at"] = datetime.now(timezone.utc).isoformat()
+                data["updated_at"] = datetime.now(timezone.utc).isoformat()
                 self._save_alerts(alerts_data)
                 self._logger.info("alert_acknowledged", alert_id=alert_id)
                 return True
@@ -424,8 +424,8 @@ class AlertManager:
         for data in alerts_data:
             if data.get("alert_id") == alert_id:
                 data["status"] = AlertStatus.RESOLVED.value
-                data["resolved_at"] = datetime.now(UTC).isoformat()
-                data["updated_at"] = datetime.now(UTC).isoformat()
+                data["resolved_at"] = datetime.now(timezone.utc).isoformat()
+                data["updated_at"] = datetime.now(timezone.utc).isoformat()
                 if resolution_note:
                     data.setdefault("metadata", {})["resolution_note"] = resolution_note
                 self._save_alerts(alerts_data)

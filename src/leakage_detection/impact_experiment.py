@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from time import perf_counter
@@ -94,7 +94,7 @@ class ExperimentResult:
     
     # Metadata
     duration_seconds: float = 0.0
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     error_message: str | None = None
     
     def to_dict(self) -> dict[str, Any]:
@@ -317,7 +317,7 @@ class LeakageImpactExperiment:
         import hashlib
         
         experiment_id = hashlib.md5(
-            f"{datetime.now(UTC).isoformat()}_{len(data)}".encode()
+            f"{datetime.now(timezone.utc).isoformat()}_{len(data)}".encode()
         ).hexdigest()[:12]
         
         start_time = perf_counter()

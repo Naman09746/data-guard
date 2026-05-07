@@ -16,6 +16,10 @@ from fastapi.responses import JSONResponse
 
 from src.api.routes.leakage_routes import router as leakage_router
 from src.api.routes.quality_routes import router as quality_router
+from src.api.routes.eda_routes import router as eda_router
+from src.api.routes.drift_routes import router as drift_router
+from src.api.routes.task_routes import router as task_router
+from src.api.routes.dashboard_routes import router as dashboard_router
 from src.core.config import get_settings
 from src.core.logging_config import get_logger, set_correlation_id
 
@@ -117,6 +121,30 @@ def create_app() -> FastAPI:
         leakage_router,
         prefix=f"{settings.api.api_prefix}/leakage",
         tags=["Leakage Detection"],
+    )
+
+    app.include_router(
+        eda_router,
+        prefix=f"{settings.api.api_prefix}/eda",
+        tags=["EDA"],
+    )
+
+    app.include_router(
+        task_router,
+        prefix=f"{settings.api.api_prefix}/tasks",
+        tags=["System"],
+    )
+
+    app.include_router(
+        dashboard_router,
+        prefix=f"{settings.api.api_prefix}/intelligence",
+        tags=["Intelligence"],
+    )
+
+    app.include_router(
+        drift_router,
+        prefix=f"{settings.api.api_prefix}/drift",
+        tags=["ML Observability"],
     )
 
     return app

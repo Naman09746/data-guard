@@ -8,6 +8,8 @@ import RiskScoringPage from './pages/RiskScoringPage'
 import ExperimentPage from './pages/ExperimentPage'
 import AlertsPage from './pages/AlertsPage'
 import HistoryPage from './pages/HistoryPage'
+import EDAPage from './pages/EDAPage'
+import DriftPage from './pages/DriftPage'
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/leakage" element={<LeakagePage />} />
         <Route path="/risk-scoring" element={<RiskScoringPage />} />
         <Route path="/experiments" element={<ExperimentPage />} />
+        <Route path="/eda" element={<EDAPage />} />
+        <Route path="/drift" element={<DriftPage />} />
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/rules" element={<RulesPage />} />

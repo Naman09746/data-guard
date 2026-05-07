@@ -316,3 +316,26 @@ async def resolve_alert(
         logger.error("resolve_alert_error", error=str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.post("/network")
+async def get_leakage_network(
+    data_file: UploadFile = File(...),
+    target_column: str = Form(...),
+) -> dict[str, Any]:
+    """
+    Generate a force-directed network graph of feature correlations.
+    Exposes hidden 'leaky clusters' that correlate too highly with the target.
+    """
+    from src.leakage_detection.network_analysis import CorrelationNetworkExtractor
+    try:
+        content = await data_file.read()
+        df = pd.read_csv(io.BytesIO(content))
+        
+        extractor = CorrelationNetworkExtractor()
+        network = extractor.extract_network(df, target_column)
+        
+        return network
+        
+    except Exception as e:
+        logger.error("network_analysis_error", error=str(e))
+        raise HTTPException(status_code=500, detail=str(e))

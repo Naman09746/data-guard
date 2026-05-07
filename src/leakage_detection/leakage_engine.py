@@ -7,7 +7,7 @@ Coordinates all detectors and generates comprehensive leakage reports.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from time import perf_counter
 from typing import Any
 
@@ -182,7 +182,7 @@ class LeakageDetectionEngine:
             detection_results=results,
             total_issues=total_issues,
             duration_seconds=duration,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime.now(timezone.utc),
             train_shape=(len(train_data), len(train_data.columns)),
             test_shape=(len(test_data), len(test_data.columns)) if test_data is not None else None,
         )

@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -47,7 +47,7 @@ class DatasetVersion:
     column_count: int
     column_names: list[str]
     column_dtypes: dict[str, str]
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: dict[str, Any] = field(default_factory=dict)
     
     def to_dict(self) -> dict[str, Any]:
@@ -82,7 +82,7 @@ class ScanRecord:
     quality_score: float | None = None
     risk_level: str | None = None
     issues_by_severity: dict[str, int] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     duration_seconds: float = 0.0
     metadata: dict[str, Any] = field(default_factory=dict)
     
@@ -161,7 +161,7 @@ class RegressionAlert:
     message: str
     recommendations: list[str] = field(default_factory=list)
     acknowledged: bool = False
-    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""

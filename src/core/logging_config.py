@@ -12,7 +12,7 @@ import sys
 import uuid
 from collections.abc import Callable
 from contextvars import ContextVar
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 from time import perf_counter
@@ -56,7 +56,7 @@ def add_timestamp(
     logger: WrappedLogger, method_name: str, event_dict: EventDict
 ) -> EventDict:
     """Add ISO timestamp to log events."""
-    event_dict["timestamp"] = datetime.now(UTC).isoformat()
+    event_dict["timestamp"] = datetime.now(timezone.utc).isoformat()
     return event_dict
 
 

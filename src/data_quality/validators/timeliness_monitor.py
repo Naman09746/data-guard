@@ -7,7 +7,7 @@ Validates data freshness, update frequency, and temporal gaps.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from time import perf_counter
 from typing import Any
 
@@ -112,7 +112,7 @@ class TimelinessMonitor(BaseValidator[pd.DataFrame]):
                     column=ts_col,
                 )], duration=perf_counter() - start_time)
 
-            ref_time = reference_time or datetime.now(UTC)
+            ref_time = reference_time or datetime.now(timezone.utc)
 
             # Freshness check
             freshness_issues, freshness_metrics = self._check_freshness(
@@ -188,7 +188,7 @@ class TimelinessMonitor(BaseValidator[pd.DataFrame]):
 
         # Make reference_time timezone-aware if needed
         if reference_time.tzinfo is None:
-            reference_time = reference_time.replace(tzinfo=UTC)
+            reference_time = reference_time.replace(tzinfo=timezone.utc)
 
         age_hours = (reference_time - latest).total_seconds() / 3600
 
@@ -231,7 +231,7 @@ class TimelinessMonitor(BaseValidator[pd.DataFrame]):
             valid_ts = valid_ts.dt.tz_localize("UTC")
 
         if reference_time.tzinfo is None:
-            reference_time = reference_time.replace(tzinfo=UTC)
+            reference_time = reference_time.replace(tzinfo=timezone.utc)
 
         # Allow small buffer for clock skew
         buffer = timedelta(minutes=5)

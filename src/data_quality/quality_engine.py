@@ -7,7 +7,7 @@ Coordinates all validators and generates comprehensive quality reports.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from time import perf_counter
 from typing import Any
 
@@ -175,7 +175,7 @@ class DataQualityEngine:
             validation_results=results,
             total_issues=total_issues,
             duration_seconds=duration,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime.now(timezone.utc),
             data_shape=(len(data), len(data.columns)),
         )
 

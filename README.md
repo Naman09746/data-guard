@@ -1,253 +1,89 @@
-# Automated Data Quality & Leakage Detection System
+# 🛡️ DataGuard: Enterprise ML Observability & Data Intelligence
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+**DataGuard** is a production-grade ML Observability platform designed to detect data quality issues, silent distribution shifts, and predictive "cheating" (leakage) in machine learning pipelines. 
 
-A **production-grade data quality and leakage detection system** for ML pipelines. This system transforms from a rule-based validator to a **meta-ML platform** that learns failure patterns.
-
-## 🌟 Key Features
-
-### 🔥 1. ML-Based Leakage Risk Scoring
-Instead of rule-based detection ("correlation > 0.95"), get **probability-based risk scores**:
-```
-Feature X has an 87% leakage risk based on learned patterns
-```
-
-Features extracted per column:
-- Correlation with target
-- Mutual information proxy
-- Stability across cross-validation splits
-- Time-lag correlation behavior
-- High-cardinality detection
-
-### 🧪 2. Before vs After Impact Experiments
-Prove business value by comparing:
-- Model trained **WITH** leaky features (inflated metrics)
-- Model trained **AFTER** removal (realistic metrics)
-
-Generates reports showing:
-- Accuracy drop
-- Generalization gap improvement
-- Cross-validation stability
-
-### 📊 3. Data Versioning & Scan History
-Track dataset evolution with:
-- Hash-based dataset versioning
-- Scan history storage
-- Diff between scans
-- **Regression alerts** when quality degrades
-
-### 🚨 4. Drift → Alert → Action Loop
-End-to-end ML lifecycle management:
-- Drift detection with severity scoring
-- Alerts with actionable recommendations
-- Affected model tracking
-- Retrain/revalidate suggestions
-
-### 📚 5. Real-World Case Study
-Complete churn prediction case study demonstrating:
-- Leakage detection in action
-- Impact experiments
-- Before/after comparison
-
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/data-quality-leakage-detection.git
-cd data-quality-leakage-detection
-
-# Install dependencies
-pip install -e ".[dev]"
-```
-
-### Basic Usage
-
-```python
-from src.leakage_detection.leakage_engine import LeakageDetectionEngine
-from src.data_quality.quality_engine import DataQualityEngine
-import pandas as pd
-
-# Load your data
-df = pd.read_csv("your_data.csv")
-
-# Data Quality Check
-quality_engine = DataQualityEngine()
-quality_report = quality_engine.validate(df)
-print(f"Quality Score: {quality_engine.get_quality_score(df):.2f}")
-
-# Leakage Detection
-leakage_engine = LeakageDetectionEngine()
-leakage_report = leakage_engine.detect(df, target_column="target")
-print(f"Leakage Status: {leakage_report.status.value}")
-
-# ML-Based Risk Scores
-risk_result = leakage_engine.get_risk_scores(df, "target")
-print(f"High-Risk Features: {risk_result.high_risk_features}")
-```
-
-### Running Impact Experiments
-
-```python
-from src.leakage_detection.impact_experiment import LeakageImpactExperiment
-
-experiment = LeakageImpactExperiment(model_type="random_forest")
-result = experiment.run_experiment(df, "target")
-
-print(f"Accuracy WITH leakage: {result.metrics_with_leakage.accuracy:.1%}")
-print(f"Accuracy AFTER removal: {result.metrics_after_removal.accuracy:.1%}")
-print(f"Accuracy drop: {result.accuracy_drop:.1%}")
-```
-
-### Data Versioning
-
-```python
-from src.core.data_versioning import DataVersioner, ScanHistoryStore
-
-# Version your dataset
-versioner = DataVersioner()
-version = versioner.create_version(df)
-print(f"Dataset Version: {version.version_hash}")
-
-# Track scan history
-store = ScanHistoryStore()
-history = store.get_scans(limit=10)
-```
-
-### Alert Management
-
-```python
-from src.core.alert_system import AlertManager
-
-manager = AlertManager()
-
-# Get open alerts
-alerts = manager.get_open_alerts()
-for alert in alerts:
-    print(f"{alert.severity.value}: {alert.title}")
-
-# Create drift alert
-alert = manager.create_drift_alert(
-    feature_name="price",
-    drift_score=0.8,
-    drift_type="distribution_shift"
-)
-```
-
-## 🧪 Running the Case Study
-
-```bash
-cd case_studies/churn_dataset
-python run_case_study.py
-```
-
-This generates:
-- `raw_data.csv` - Synthetic churn dataset with intentional leakage
-- `leakage_found.md` - Detection report
-- `metrics_before.md` - Inflated model metrics
-- `metrics_after.md` - Realistic metrics after cleanup
-
-## 🔌 API Endpoints
-
-Start the server:
-```bash
-uvicorn src.api.main:app --reload --port 8000
-```
-
-### Available Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/leakage/detect` | POST | Upload CSV for leakage detection |
-| `/api/leakage/risk-scores` | POST | Get ML-based risk scores |
-| `/api/leakage/experiments/impact` | POST | Run before/after experiment |
-| `/api/leakage/history` | GET | Get scan history |
-| `/api/leakage/alerts` | GET | Get alerts |
-| `/api/leakage/alerts/{id}/acknowledge` | POST | Acknowledge alert |
-| `/api/leakage/alerts/{id}/resolve` | POST | Resolve alert |
-| `/api/quality/validate` | POST | Run quality validation |
-
-## 🏗️ Project Structure
-
-```
-├── src/
-│   ├── api/                    # FastAPI routes
-│   ├── core/
-│   │   ├── alert_system.py     # Alert management
-│   │   ├── data_versioning.py  # Dataset versioning
-│   │   └── config.py           # Configuration
-│   ├── data_quality/
-│   │   ├── quality_engine.py   # Main quality validator
-│   │   └── validators/         # Individual validators
-│   ├── leakage_detection/
-│   │   ├── leakage_engine.py   # Main detection orchestrator
-│   │   ├── risk_scoring_model.py   # ML-based risk scoring
-│   │   ├── impact_experiment.py    # Before/after experiments
-│   │   └── detectors/          # Individual detectors
-│   └── utils/
-├── dashboard/                  # React + Vite frontend
-├── case_studies/
-│   └── churn_dataset/          # Complete case study
-├── tests/
-│   ├── unit/
-│   │   ├── test_risk_scoring.py
-│   │   ├── test_impact_experiment.py
-│   │   ├── test_data_versioning.py
-│   │   ├── test_alert_system.py
-│   │   ├── test_detectors.py
-│   │   └── test_validators.py
-│   └── integration/
-└── pyproject.toml
-```
-
-## 🧪 Running Tests
-
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run with coverage
-pytest tests/ -v --cov=src --cov-report=html
-
-# Run specific test file
-pytest tests/unit/test_risk_scoring.py -v
-```
-
-## 📈 Why This Matters for ML
-
-1. **Leakage causes unrealistic expectations** - Models appear to perform much better than they will in production
-2. **ML-based detection catches subtle leaks** - Rule-based approaches miss complex patterns
-3. **Impact experiments prove business value** - Show stakeholders exactly why leakage matters
-4. **Version tracking enables observability** - Know when quality degrades before it affects models
-
-## 🔧 Configuration
-
-Create a `.env` file (see `.env.example`):
-
-```bash
-# Logging
-LOG_LEVEL=INFO
-
-# API
-API_HOST=0.0.0.0
-API_PORT=8000
-
-# Alert thresholds
-CORRELATION_THRESHOLD=0.95
-DRIFT_THRESHOLD=0.1
-```
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
+Built with a high-performance **FastAPI** backend and an **interactive React** dashboard, it transforms raw data into actionable **AI-driven insights** using a domain-specific fine-tuned LLM.
 
 ---
 
-**Built for production ML pipelines** - ensuring data quality and preventing leakage before it affects your models.
+## 🚀 Key Engineering Pillars
+
+### 1. 🧠 AI-Driven Insight Engine
+*   **Fine-tuned Model**: Integrates a domain-specific LLM (Lily-1.5B) fine-tuned on data quality instruction sets using **Unsloth & LoRA**.
+*   **Automated Root Cause Analysis**: Instead of raw numbers, get natural language narratives explaining *why* your data is failing.
+
+### 2. ⚡ Distributed Async Architecture
+*   **Task Orchestration**: Uses **Celery + Redis** to offload heavy statistical computations (EDA, Drift) to background workers.
+*   **Real-time Tracking**: Interactive progress bars and polling keep the UI responsive during massive dataset scans.
+
+### 3. 📉 ML Observability Suite
+*   **Drift Intelligence**: Implements **Population Stability Index (PSI)** and **KS-Tests** to monitor silent model degradation.
+*   **Leakage Discovery**: Force-directed network graphs visually expose hidden correlations between features and targets.
+
+### 4. 🏛️ Executive Intelligence
+*   **Global Health Score**: A weighted integrity metric (0-100) aggregating Quality, Drift, and Leakage risks.
+*   **Command Center**: A premium dashboard with integrity trends and risk exposure analytics for ML Leads.
+
+---
+
+## 🛠️ Technology Stack
+*   **Backend**: Python (FastAPI, SQLAlchemy 2.0, Celery, Pydantic)
+*   **Frontend**: React (TypeScript, Vite, TailwindCSS, ECharts, Framer Motion)
+*   **Data Layer**: PostgreSQL (Persistent storage), Redis (Task Queue)
+*   **ML/AI**: Scipy, Scikit-learn, Pandas, Unsloth (Fine-tuning), Ollama (Local Inference)
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    A[User/CSV Upload] --> B[FastAPI Gateway]
+    B --> C[PostgreSQL: Metadata & Results]
+    B --> D[Redis Task Queue]
+    D --> E[Celery Worker: Statistics]
+    D --> F[Celery Worker: AI Insights]
+    E --> G[EDA / Drift / Leakage Engines]
+    F --> H[Local LLM / Ollama]
+    G --> C
+    H --> C
+    C --> I[React Dashboard]
+    I --> J[Force-Directed Graphs]
+    I --> K[Executive Summary]
+```
+
+---
+
+## 🚦 Getting Started
+
+### Prerequisites
+*   Python 3.10+
+*   PostgreSQL & Redis
+*   Ollama (running `lily-1.5b` or `llama3`)
+
+### Backend Setup
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Start Celery Worker
+celery -A src.core.celery_app worker --loglevel=info
+
+# Start FastAPI
+uvicorn src.api.main:app --reload
+```
+
+### Frontend Setup
+```bash
+cd dashboard
+npm install
+npm run dev
+```
+
+---
+
+## 🏆 Resume Highlights
+*   **Engineered** a distributed ML observability platform capable of processing 1M+ rows asynchronously using Celery and Redis.
+*   **Implemented** statistical drift detection (PSI) and leakage discovery algorithms used in industry-standard tools like Great Expectations and EvidentlyAI.
+*   **Architected** a persistent data layer with SQLAlchemy 2.0 to track data integrity trends over time.
+*   **Developed** a custom AI insight engine using LoRA adapters for fine-tuning local 1.5B parameter models.

@@ -11,6 +11,7 @@ import {
     FlaskConical,
     Bell,
     History,
+    Search,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -23,6 +24,7 @@ const navItems = [
     { path: '/leakage', label: 'Leakage Detection', icon: AlertTriangle },
     { path: '/risk-scoring', label: 'Risk Scoring', icon: Brain },
     { path: '/experiments', label: 'Experiments', icon: FlaskConical },
+    { path: '/eda', label: 'Advanced EDA', icon: Search },
     { path: '/alerts', label: 'Alerts', icon: Bell },
     { path: '/history', label: 'History', icon: History },
     { path: '/rules', label: 'Custom Rules', icon: Settings },

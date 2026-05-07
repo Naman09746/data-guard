@@ -118,6 +118,21 @@ class APISettings(BaseSettings):
     request_timeout_seconds: int = Field(default=300, gt=0)
 
 
+class DatabaseSettings(BaseSettings):
+    """PostgreSQL database settings."""
+
+    url: str = Field(default="postgresql+asyncpg://postgres:postgres@localhost:5432/dataguard")
+    pool_size: int = Field(default=20, ge=1)
+    max_overflow: int = Field(default=10, ge=0)
+
+
+class RedisSettings(BaseSettings):
+    """Redis settings for caching and tasks."""
+
+    url: str = Field(default="redis://localhost:6379/0")
+    cache_ttl: int = Field(default=3600, gt=0)
+
+
 class Settings(BaseSettings):
     """
     Main application settings.
@@ -155,6 +170,8 @@ class Settings(BaseSettings):
     leakage: LeakageSettings = Field(default_factory=LeakageSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     api: APISettings = Field(default_factory=APISettings)
+    database: DatabaseSettings = Field(default_factory=DatabaseSettings)
+    redis: RedisSettings = Field(default_factory=RedisSettings)
 
     # Performance
     max_workers: int = Field(default=4, ge=1)
