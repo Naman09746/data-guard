@@ -1,6 +1,7 @@
 import json
 import random
 import os
+from typing import Any
 
 def generate_synthetic_example():
     """Generates a single instruction-tuning pair for data quality."""
@@ -21,11 +22,11 @@ def generate_synthetic_example():
     problem = random.choice(problems)
     
     # Build statistics based on the problem
-    stats = {
+    stats: dict[str, Any] = {
         "dataset_name": f"{domain.lower()}_v1.csv",
         "rows": random.randint(1000, 100000),
         "columns": random.randint(10, 50),
-        "health_score": 0,
+        "health_score": 0.0,
         "risks": [],
         "columns_sample": []
     }
