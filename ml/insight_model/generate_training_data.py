@@ -1,6 +1,6 @@
 import json
 import random
-from typing import List, Dict
+import os
 
 def generate_synthetic_example():
     """Generates a single instruction-tuning pair for data quality."""
@@ -42,6 +42,14 @@ def generate_synthetic_example():
         stats["health_score"] = random.uniform(60, 80)
         stats["risks"] = ["feature_drift", "concept_drift"]
         stats["columns_sample"].append({"name": "transaction_amount", "psi_score": 0.25, "drift_detected": True})
+    elif problem == "feature_skew":
+        stats["health_score"] = random.uniform(70, 85)
+        stats["risks"] = ["asymmetric_distribution", "outliers_detected"]
+        stats["columns_sample"].append({"name": "age", "skewness": 2.4, "outliers_pct": 0.05})
+    elif problem == "duplicate_contamination":
+        stats["health_score"] = random.uniform(50, 70)
+        stats["risks"] = ["duplicate_rows_detected", "train_test_overlap"]
+        stats["columns_sample"].append({"name": "email", "duplicate_pct": 0.12})
     else:
         stats["health_score"] = random.uniform(90, 100)
         stats["risks"] = []
@@ -56,6 +64,12 @@ def generate_synthetic_example():
         output = f"The {domain} dataset shows critical Target Leakage in the 'future_payment_status' column (corr=0.99). This feature likely contains information from the future that would not be available at inference time. Action: Remove this column immediately to avoid overfitting and unrealistic performance."
     elif problem == "high_missingness":
         output = f"I detected significant data gaps in the 'user_income' column (45% missing). Given this is a {domain} context, this could introduce socio-economic bias. Recommendation: Use iterative imputer or investigate if the data is Missing Not At Random (MNAR)."
+    elif problem == "data_drift":
+        output = f"Warning: Statistical drift detected in 'transaction_amount' (PSI=0.25). This {domain} dataset's distribution has shifted since training, which will degrade model performance. Action: Retrain the model on more recent data or implement a dynamic weighting scheme."
+    elif problem == "feature_skew":
+        output = f"The 'age' column shows significant skewness (2.4). In {domain} modeling, this can lead to biased predictions for certain subgroups. Recommendation: Apply a log-transform or power-transform to normalize the distribution."
+    elif problem == "duplicate_contamination":
+        output = f"Critical error: 12% duplicate rows detected in 'email'. This {domain} dataset likely has train-test contamination, which leads to over-optimistic performance metrics. Action: De-duplicate the dataset immediately."
     else:
         output = f"This {domain} dataset is exceptionally healthy with a score of {stats['health_score']:.1f}%. All key features show low missingness and stable distributions. It is ready for model training."
 
@@ -67,10 +81,11 @@ def generate_synthetic_example():
 
 def main():
     dataset = [generate_synthetic_example() for _ in range(1000)]
-    with open("ml/insight_model/train_data.jsonl", "w") as f:
+    output_path = os.path.join(os.path.dirname(__file__), "train_data.jsonl")
+    with open(output_path, "w") as f:
         for entry in dataset:
             f.write(json.dumps(entry) + "\n")
-    print(f"Generated {len(dataset)} synthetic training examples in ml/insight_model/train_data.jsonl")
+    print(f"Generated {len(dataset)} synthetic training examples in {output_path}")
 
 if __name__ == "__main__":
     main()
