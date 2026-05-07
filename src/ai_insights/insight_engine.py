@@ -46,13 +46,42 @@ class InsightEngine:
             return self._get_fallback_insights(report, str(e))
 
     def _parse_llm_response(self, text: str) -> Dict[str, Any]:
-        # This is a simplified parser. In a real scenario, we might use regex or 
-        # ask the LLM for JSON directly.
-        return {
-            "narrative": text.split("1.")[0].strip() if "1." in text else text,
+        """
+        Parses the 4-part structured report from the fine-tuned model.
+        """
+        sections = {
+            "narrative": "Insight summary unavailable.",
+            "top_risks": [],
+            "recommendations": [],
+            "executive_summary": "Summary unavailable.",
             "raw_output": text,
             "model_name": self.model
         }
+
+        try:
+            # Split by the numbered headers we trained on
+            parts = text.split("\n\n")
+            
+            for part in parts:
+                if "1. Narrative Summary:" in part:
+                    sections["narrative"] = part.replace("1. Narrative Summary:", "").strip()
+                elif "2. Top Critical Risks:" in part:
+                    risks = part.replace("2. Top Critical Risks:", "").strip().split("\n")
+                    sections["top_risks"] = [r.strip("- ").strip("123. ") for r in risks if r.strip()]
+                elif "3. Actionable Recommendations:" in part:
+                    recs = part.replace("3. Actionable Recommendations:", "").strip().split("\n")
+                    sections["recommendations"] = [r.strip("- ").strip("123. ") for r in recs if r.strip()]
+                elif "4. Executive Summary:" in part:
+                    sections["executive_summary"] = part.replace("4. Executive Summary:", "").strip()
+
+            # Fallback if parsing failed but we have text
+            if sections["narrative"] == "Insight summary unavailable." and text:
+                sections["narrative"] = text[:500] + "..."
+
+            return sections
+            
+        except Exception:
+            return sections
 
     def _get_fallback_insights(self, report: EDAReport, error: str) -> Dict[str, Any]:
         return {

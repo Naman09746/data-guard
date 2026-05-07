@@ -5,7 +5,7 @@ class InsightPromptBuilder:
     @staticmethod
     def build_dataset_summary_prompt(report: EDAReport) -> str:
         """
-        Build a prompt for the local LLM to generate dataset insights.
+        Build a prompt that matches the fine-tuned Lily-1.5B training format.
         """
         columns_info = []
         for col in report.column_profiles:
@@ -18,28 +18,25 @@ class InsightPromptBuilder:
 
         columns_str = "\n".join(columns_info)
         
-        prompt = f"""
-You are an expert Data Scientist and ML Engineer. 
-Analyze the following dataset profile and provide high-level insights.
+        # This instruction matches the generate_training_data.py exactly
+        instruction = f"Analyze the following data quality profile for a dataset and provide professional recommendations."
+        
+        input_text = (
+            f"Dataset Name: {report.dataset_name}\n"
+            f"Shape: {report.shape[0]} rows x {report.shape[1]} columns\n"
+            f"Memory: {report.memory_mb:.1f} MB\n"
+            f"Duplicate Rows: {report.duplicate_rows} ({(report.duplicate_pct * 100):.1f}%)\n"
+            f"Overall Health Score: {report.overall_health_score:.1f}/100\n\n"
+            f"Column Profiles:\n{columns_str}\n\n"
+            f"Detected Risks:\n{', '.join(report.top_risks) if report.top_risks else 'None detected by automated rules.'}"
+        )
 
-Dataset Name: {report.dataset_name}
-Shape: {report.shape[0]} rows x {report.shape[1]} columns
-Memory: {report.memory_mb:.1f} MB
-Duplicate Rows: {report.duplicate_rows} ({(report.duplicate_pct * 100):.1f}%)
-Overall Health Score: {report.overall_health_score:.1f}/100
-
-Column Profiles:
-{columns_str}
-
-Detected Risks:
-{", ".join(report.top_risks) if report.top_risks else "None detected by automated rules."}
-
-Based on this data, provide:
-1. A 2-sentence narrative summary of the dataset.
-2. Top 3 most critical data quality or leakage risks.
-3. 3 actionable preprocessing or feature engineering recommendations.
-4. A brief executive summary for a non-technical stakeholder.
-
-Format your response as a structured report.
-"""
+        # We use the Alpaca template format used during training
+        prompt = (
+            "Below is an instruction that describes a data quality analysis task. "
+            "Write a structured professional response.\n\n"
+            f"### Instruction:\n{instruction}\n\n"
+            f"### Input:\n{input_text}\n\n"
+            f"### Response:\n"
+        )
         return prompt.strip()
