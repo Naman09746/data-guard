@@ -1,0 +1,77 @@
+FROM Qwen2.5-1.5B-Instruct.Q4_K_M.gguf
+
+TEMPLATE """{{- if .Messages }}
+{{- if or .System .Tools }}<|im_start|>system
+{{- if .System }}
+{{ .System }}
+{{- end }}
+{{- if .Tools }}
+
+# Tools
+
+You may call one or more functions to assist with the user query.
+
+You are provided with function signatures within <tools></tools> XML tags:
+<tools>
+{{- range .Tools }}
+{"type": "function", "function": {{ .Function }}}
+{{- end }}
+</tools>
+
+For each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:
+<tool_call>
+{"name": <function-name>, "arguments": <args-json-object>}
+</tool_call>
+{{- end }}<|im_end|>
+{{ end }}
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 -}}
+{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+{{ if .Content }}{{ .Content }}
+{{- else if .ToolCalls }}<tool_call>
+{{ range .ToolCalls }}{"name": "{{ .Function.Name }}", "arguments": {{ .Function.Arguments }}}
+{{ end }}</tool_call>
+{{- end }}{{ if not $last }}<|im_end|>
+{{ end }}
+{{- else if eq .Role "tool" }}<|im_start|>user
+<tool_response>
+{{ .Content }}
+</tool_response><|im_end|>
+{{ end }}
+{{- if and (ne .Role "assistant") $last }}<|im_start|>assistant
+{{ end }}
+{{- end }}
+{{- else }}
+{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ end }}{{ .Response }}{{ if .Response }}<|im_end|>{{ end }}"""
+
+# Stop tokens — tells the model when to stop generating
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+
+# Temperature 0.2 = focused and consistent (ideal for structured reports)
+# Higher values (>0.7) cause the model to ignore the 4-part format
+PARAMETER temperature 0.2
+
+# min_p filters out very low-probability tokens — keeps outputs professional
+PARAMETER min_p 0.05
+
+# Context window — set to 4096 to handle large dataset profiles without truncation
+PARAMETER num_ctx 4096
+
+# DataGuard-specific system prompt — replaces the generic "You are Qwen" identity
+SYSTEM """You are the DataGuard AI, an expert Data Scientist and ML Engineer specializing in data quality analysis. 
+
+When given a dataset profile, you ALWAYS respond with a structured 4-part report:
+1. Narrative Summary: A concise 2-sentence summary of the dataset's overall health.
+2. Top Critical Risks: The most dangerous data quality issues found.
+3. Actionable Recommendations: Specific, technical steps to fix the issues.
+4. Executive Summary: A plain-language brief for non-technical stakeholders.
+
+You are professional, precise, and always base your analysis on the data provided."""
