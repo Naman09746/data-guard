@@ -5,11 +5,11 @@ Optimization: Unsloth + LoRA
 """
 
 try:
-    from unsloth import FastLanguageModel
-    import torch
-    from trl import SFTTrainer
-    from transformers import TrainingArguments
-    from datasets import load_dataset
+    from unsloth import FastLanguageModel # type: ignore
+    import torch # type: ignore
+    from trl import SFTTrainer # type: ignore
+    from transformers import TrainingArguments # type: ignore
+    from datasets import load_dataset # type: ignore
 except ImportError:
     print("Dependencies not found. Install with: pip install unsloth [colab-new] datasets trl")
     exit()
