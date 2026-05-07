@@ -7,7 +7,7 @@ Run this script on a GPU machine (Colab, Lambda, Vast.ai etc.)
 after generating the dataset with:
     python ml/insight_model/generate_training_data.py
 """
-
+!pip install 'unsloth[colab-new]' datasets trl # type: ignore
 import os
 
 try:
@@ -131,10 +131,37 @@ print(f"Saving LoRA adapters to {OUTPUT_DIR}...")
 model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
-# ─── 8. Export to GGUF for Ollama (uncomment when ready to deploy) ────────────
+# ───# 8. Export to GGUF for Ollama
+# Uncomment this in Colab to export the model
 # print("Exporting to GGUF for Ollama...")
-# model.save_pretrained_gguf(OUTPUT_DIR + "_gguf", tokenizer, quantization_method="q4_k_m")
-# print("GGUF model saved. To load in Ollama:")
-# print(f"  ollama create lily-dataguard -f {OUTPUT_DIR}_gguf/Modelfile")
+# model.save_pretrained_gguf(OUTPUT_DIR + "_gguf", tokenizer, quantization_method = "q4_k_m")
+
+# 9. Automated Modelfile Generation
+# This creates the perfect config for Ollama automatically
+modelfile_path = os.path.join(OUTPUT_DIR + "_gguf", "Modelfile")
+modelfile_content = """
+FROM ./Qwen2.5-1.5B-Instruct.Q4_K_M.gguf
+
+# Parameters for reliability
+PARAMETER temperature 0.2
+PARAMETER num_ctx 4096
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+
+# The professional DataGuard identity
+SYSTEM \"\"\"You are the DataGuard AI, an expert Data Scientist and ML Engineer.
+When given a dataset profile, you ALWAYS respond with a structured 4-part report:
+1. Narrative Summary: A concise 2-sentence summary of the dataset's overall health.
+2. Top Critical Risks: The most dangerous data quality issues found.
+3. Actionable Recommendations: Specific, technical steps to fix the issues.
+4. Executive Summary: A plain-language brief for non-technical stakeholders.
+\"\"\"
+"""
+
+# Only write if the directory exists (post-export)
+if os.path.exists(OUTPUT_DIR + "_gguf"):
+    with open(modelfile_path, "w") as f:
+        f.write(modelfile_content.strip())
+    print(f"✅ Optimized Modelfile created at: {modelfile_path}")
 
 print("Done! Fine-tuning complete.")
